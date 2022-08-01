@@ -203,6 +203,7 @@ RCT_EXPORT_METHOD(peerConnectionSetLocalDescription:(nonnull NSNumber *)objectID
             @"type": [RTCSessionDescription stringForType:strongPc.localDescription.type],
             @"sdp": strongPc.localDescription.sdp
         };
+          // TODO: return transceiver information.
         resolve(newSdp);
       }
   };
@@ -321,6 +322,29 @@ RCT_EXPORT_METHOD(peerConnectionRestartIce:(nonnull NSNumber *)objectID)
 
   [peerConnection restartIce];
 }
+
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(peerConnectionAddTrack:(nonnull NSNumber *)objectID
+                                                      trackId:(NSString *)trackId
+                                                      options:(NSDictionary *)options)
+{
+    // TODO.
+    return nil;
+}
+
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(peerConnectionAddTransceiver:(nonnull NSNumber *)objectID
+                                                            options:(NSDictionary *)options)
+{
+    // TODO.
+    return nil;
+}
+
+RCT_EXPORT_METHOD(peerConnectionRemoveTrack:(nonnull NSNumber *)objectID
+                                   senderId:(nonnull NSNumber *)senderId)
+{
+    // TODO.
+}
+
+// TODO: move these below to some SerializeUrils file
 
 /**
  * Constructs a JSON <tt>NSString</tt> representation of a specific
