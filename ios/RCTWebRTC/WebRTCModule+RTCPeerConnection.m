@@ -581,8 +581,20 @@ RCT_EXPORT_METHOD(peerConnectionRemoveTrack:(nonnull NSNumber *)objectID
     [self sendEventWithName:kEventPeerConnectionDidOpenDataChannel body:body];
 }
 
+- (void)peerConnection:(RTCPeerConnection *)peerConnection didStartReceivingOnTransceiver:(RTCRtpTransceiver *)transceiver                                                                                                    streams:(NSArray<RTCMediaStream *> *)mediaStreams {
+    // TODO: implement ontrack for Unified Plan.
+}
+
 - (void)peerConnection:(nonnull RTCPeerConnection *)peerConnection didRemoveIceCandidates:(nonnull NSArray<RTCIceCandidate *> *)candidates {
-  // TODO
+    // Unimplemented, there is no matching web API.
+}
+
+- (void)peerConnection:(nonnull RTCPeerConnection *)peerConnection didAddStream:(nonnull RTCMediaStream *)stream {
+    // Unused in Unified Plan.
+}
+
+- (void)peerConnection:(nonnull RTCPeerConnection *)peerConnection didRemoveStream:(nonnull RTCMediaStream *)stream {
+    // Unused in Unified Plan.
 }
 
 @end
