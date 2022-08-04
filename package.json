@@ -57,7 +57,7 @@
     ]
   },
   "webrtc-builds": {
-    "android": "https://github.com/jitsi/webrtc/releases/download/v100.0.1/android-webrtc.tgz",
+    "android": "https://github.com/jitsi/webrtc/releases/download/v100.0.2/android-webrtc.tgz",
     "ios": "https://github.com/jitsi/webrtc/releases/download/v100.0.1/WebRTC.xcframework.tgz"
   }
 }
