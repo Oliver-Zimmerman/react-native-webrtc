@@ -58,6 +58,8 @@ public class SerializeUtils {
                 return "sendonly";
             case SEND_RECV:
                 return "sendrecv";
+            case STOPPED:
+                return "stopped";
             default:
                 throw new Error("Invalid direction");
         }
@@ -245,6 +247,8 @@ public class SerializeUtils {
                 return RtpTransceiver.RtpTransceiverDirection.RECV_ONLY;
             case "inactive":
                 return RtpTransceiver.RtpTransceiverDirection.INACTIVE;
+            // Here we ignore the "stopped" direction because user code should
+            // never set it.
         }
         throw new Error("Invalid direction");
     }
