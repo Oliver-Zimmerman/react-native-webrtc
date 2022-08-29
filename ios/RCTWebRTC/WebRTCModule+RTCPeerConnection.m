@@ -211,7 +211,6 @@ RCT_EXPORT_METHOD(peerConnectionSetLocalDescription:(nonnull NSNumber *)objectID
   __weak RTCPeerConnection *weakPc = peerConnection;
 
   RTCSetSessionDescriptionCompletionHandler handler = ^(NSError *error) {
-    dispatch_async(self.workerQueue, ^{
       if (error) {
           reject(@"E_OPERATION_ERROR", error.localizedDescription, nil);
       } else {
@@ -225,7 +224,6 @@ RCT_EXPORT_METHOD(peerConnectionSetLocalDescription:(nonnull NSNumber *)objectID
         };
         resolve(newSdp);
       }
-    });
   };
 
   if (desc == nil) {
@@ -243,7 +241,6 @@ RCT_EXPORT_METHOD(peerConnectionSetRemoteDescription:(RTCSessionDescription *)sd
   }
 
   [peerConnection setRemoteDescription: sdp completionHandler: ^(NSError *error) {
-    dispatch_async(self.workerQueue, ^{
       if (error) {
         id errorResponse = @{
           @"name": @"SetRemoteDescriptionFailed",
@@ -259,7 +256,6 @@ RCT_EXPORT_METHOD(peerConnectionSetRemoteDescription:(RTCSessionDescription *)sd
         };
         callback(@[@(YES), newSdp]);
       }
-    });
   }];
 }
 
@@ -754,7 +750,8 @@ RCT_EXPORT_METHOD(peerConnectionRemoveTrack:(nonnull NSNumber *)objectID
         }
         
         if (track.kind == kRTCMediaStreamTrackKindVideo) {
-            [peerConnection.videoTrackAdapters setObject:track forKey:track.trackId];
+            RTCVideoTrack *videoTrack = (RTCVideoTrack *)track;
+            [peerConnection addVideoTrackAdapter: videoTrack];
         }
         
         peerConnection.remoteTracks[track.trackId] = track;

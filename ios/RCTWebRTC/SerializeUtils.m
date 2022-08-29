@@ -10,9 +10,9 @@
     result[@"mid"] = transceiver.mid;
     result[@"direction"] = [SerializeUtils serializeDirection: transceiver.direction];
     
-    RTCRtpTransceiverDirection *currentDirection = nil;
-    if ([transceiver currentDirection: currentDirection]) {
-        result[@"currentDirection"] = [SerializeUtils serializeDirection: *currentDirection];
+    RTCRtpTransceiverDirection currentDirection;
+    if ([transceiver currentDirection: &currentDirection]) {
+        result[@"currentDirection"] = [SerializeUtils serializeDirection: currentDirection];
     }
     
     result[@"isStopped"] = [NSNumber numberWithBool:transceiver.isStopped];
@@ -27,13 +27,13 @@
     NSMutableArray *transceiverUpdates = [NSMutableArray new];
     
     for (RTCRtpTransceiver *transceiver in peerConnection.transceivers) {
-        RTCRtpTransceiverDirection *currentDirection = nil;
-        if ([transceiver currentDirection: currentDirection]) {
+        RTCRtpTransceiverDirection currentDirection;
+        if ([transceiver currentDirection: &currentDirection]) {
             NSMutableDictionary *transceiverUpdate= [NSMutableDictionary new];
             transceiverUpdate[@"transceiverId"] = transceiver.sender.senderId;
             transceiverUpdate[@"peerConnectionId"] = peerConnectionId;
             transceiverUpdate[@"mid"] = transceiver.mid;
-            NSString *currentDirectionSerialized = [SerializeUtils serializeDirection: *currentDirection];
+            NSString *currentDirectionSerialized = [SerializeUtils serializeDirection: currentDirection];
             transceiverUpdate[@"currentDirection"] = currentDirectionSerialized;
             transceiverUpdate[@"senderRtpParameters"] = [SerializeUtils parametersToJSON:transceiver.sender.parameters];
             
