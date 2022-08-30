@@ -60,16 +60,16 @@ RCT_EXPORT_METHOD(senderReplaceTrack:(nonnull NSNumber *) objectID
         RTCPeerConnection *peerConnection = self.peerConnections[objectID];
 
         if (peerConnection == nil) {
-            RCTLogWarn(@"PeerConnection %@ not found", objectID);
+            RCTLogWarn(@"PeerConnection %@ not found in senderReplaceTrack()", objectID);
             reject(@"E_INVALID", @"Peer Connection is not initialized", nil);
         }
 
         RTCRtpTransceiver *transceiver = nil;
         for (RTCRtpTransceiver *t in peerConnection.transceivers) {
-                if (t.sender.senderId == senderId) {
-                    transceiver = t;
-                    break;
-                }
+            if ([senderId isEqual: t.sender.senderId]) {
+                transceiver = t;
+                break;
+            }
         }
 
         if (transceiver == nil) {
@@ -92,13 +92,13 @@ RCT_EXPORT_METHOD(senderSetParameters:(nonnull NSNumber *) objectID
         RTCPeerConnection *peerConnection = self.peerConnections[objectID];
 
         if (peerConnection == nil) {
-            RCTLogWarn(@"PeerConnection %@ not found", objectID);
+            RCTLogWarn(@"PeerConnection %@ not found in senderSetParameters()", objectID);
             reject(@"E_INVALID", @"Peer Connection is not initialized", nil);
         }
 
         RTCRtpTransceiver *transceiver = nil;
         for (RTCRtpTransceiver *t in peerConnection.transceivers) {
-            if (t.sender.senderId == senderId) {
+            if ([senderId isEqual: t.sender.senderId]) {
                 transceiver = t;
                 break;
             }
@@ -121,13 +121,13 @@ RCT_EXPORT_METHOD(transceiverSetDirection:(nonnull NSNumber *) objectID
         RTCPeerConnection *peerConnection = self.peerConnections[objectID];
 
         if (peerConnection == nil) {
-            RCTLogWarn(@"transceiverSetDirection() PeerConnection %@ not found", objectID);
+            RCTLogWarn(@"transceiverSetDirection() PeerConnection %@ not found in transceiverSetDirection()", objectID);
             return;
         }
 
         RTCRtpTransceiver *transceiver = nil;
         for (RTCRtpTransceiver *t in peerConnection.transceivers) {
-            if (t.sender.senderId == senderId) {
+            if ([senderId isEqual: t.sender.senderId]) {
                 transceiver = t;
                 break;
             }
@@ -156,13 +156,13 @@ RCT_EXPORT_METHOD(transceiverStop:(nonnull NSNumber *) objectID
         RTCPeerConnection *peerConnection = self.peerConnections[objectID];
 
         if (peerConnection == nil) {
-            RCTLogWarn(@"PeerConnection %@ not found", objectID);
+            RCTLogWarn(@"PeerConnection %@ not found in transceiverStop()", objectID);
             return;
         }
 
         RTCRtpTransceiver *transceiver = nil;
         for (RTCRtpTransceiver *t in peerConnection.transceivers) {
-            if (t.sender.senderId == senderId) {
+            if ([senderId isEqual: t.sender.senderId]) {
                 transceiver = t;
                 break;
             }

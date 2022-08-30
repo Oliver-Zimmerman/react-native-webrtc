@@ -352,7 +352,7 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(peerConnectionAddTrack:(nonnull NSNumber 
     dispatch_sync(self.workerQueue, ^{
         RTCPeerConnection *peerConnection = self.peerConnections[objectID];
         if (!peerConnection) {
-          RCTLogWarn(@"PeerConnection %@ not found", objectID);
+          RCTLogWarn(@"PeerConnection %@ not found in peerConnectionAddTrack()", objectID);
           return;
         }
 
@@ -387,7 +387,7 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(peerConnectionAddTransceiver:(nonnull NSN
     dispatch_sync(self.workerQueue, ^{
         RTCPeerConnection *peerConnection = self.peerConnections[objectID];
         if (!peerConnection) {
-          RCTLogWarn(@"PeerConnection %@ not found", objectID);
+          RCTLogWarn(@"PeerConnection %@ not found in peerConnectionAddTransceiver()", objectID);
           return;
         }
 
@@ -456,7 +456,7 @@ RCT_EXPORT_METHOD(peerConnectionRemoveTrack:(nonnull NSNumber *)objectID
 {
         RTCPeerConnection *peerConnection = self.peerConnections[objectID];
         if (!peerConnection) {
-          RCTLogWarn(@"PeerConnection %@ not found", objectID);
+          RCTLogWarn(@"PeerConnection %@ not found in peerConnectionRemoveTrack()", objectID);
           [self sendErrorWithEventName: kEventPeerConnectionOnError
                               funcName: @"removeTrack"
                                message: @"Peer Connection is not initialized"
