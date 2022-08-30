@@ -661,7 +661,7 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
                 }
                 RtpTransceiver transceiver = pco.getTransceiver(senderId);
 
-                transceiver.stop();
+                transceiver.stopStandard();
                 sendEvent("transceiverStopSuccessful", identifier);
             } catch (Exception e) {
                 Log.d(TAG, "transceiverStop(): " + e.getMessage());
