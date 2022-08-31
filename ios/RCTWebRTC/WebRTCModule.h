@@ -43,7 +43,7 @@ static NSString *const kEventMediaStreamTrackOnMuteChanged = @"mediaStreamTrackO
 @property(nonatomic, strong) dispatch_queue_t workerQueue;
 
 @property (nonatomic, strong) RTCPeerConnectionFactory *peerConnectionFactory;
-@property (nonatomic, strong) id<RTCVideoEncoderFactory> decoderFactory;
+@property (nonatomic, strong) id<RTCVideoDecoderFactory> decoderFactory;
 @property (nonatomic, strong) id<RTCVideoEncoderFactory> encoderFactory;
 
 @property (nonatomic, strong) NSMutableDictionary<NSNumber *, RTCPeerConnection *> *peerConnections;
@@ -54,5 +54,10 @@ static NSString *const kEventMediaStreamTrackOnMuteChanged = @"mediaStreamTrackO
                         decoderFactory:(id<RTCVideoDecoderFactory>)decoderFactory;
 
 - (RTCMediaStream*)streamForReactTag:(NSString*)reactTag;
+
+- (void)sendErrorWithEventName: (NSString *) eventName
+                      funcName: (NSString *) funcName
+                       message: (NSString *) message
+                          info: (NSDictionary *) info;
 
 @end
