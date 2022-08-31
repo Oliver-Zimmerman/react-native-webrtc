@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 class PeerConnectionObserver implements PeerConnection.Observer {
@@ -335,19 +336,21 @@ class PeerConnectionObserver implements PeerConnection.Observer {
      */
     @Override
     public void onAddTrack(final RtpReceiver receiver, final MediaStream[] mediaStreams) {
-    }
-
-    /**
-     * Triggered when the signaling from SetRemoteDescription indicates that a transceiver
-     * will be receiving media from a remote endpoint. This is only called if UNIFIED_PLAN
-     * semantics are specified. The transceiver will be disposed automatically.
-     */
-    @Override
-    public void onTrack(final RtpTransceiver transceiver, final MediaStream[] mediaStreams) {
-        Log.d(TAG, "onTrack");
+        Log.d(TAG, "onAddTrack");
 
         ThreadUtils.runOnExecutor(() -> {
-            final RtpReceiver receiver = transceiver.getReceiver();
+            RtpTransceiver transceiver = null;
+            for(RtpTransceiver t: this.peerConnection.getTransceivers()) {
+                if (Objects.equals(t.getReceiver().id(), receiver.id())) {
+                    transceiver = t;
+                    break;
+                }
+            }
+
+            if (transceiver == null) {
+                return;
+            }
+
             final MediaStreamTrack track = receiver.track();
 
             if (remoteTracks.containsKey(track.id())) {
@@ -390,6 +393,15 @@ class PeerConnectionObserver implements PeerConnection.Observer {
 
             webRTCModule.sendEvent("peerConnectionOnTrack", params);
         });
+    }
+
+    /**
+     * Triggered when the signaling from SetRemoteDescription indicates that a transceiver
+     * will be receiving media from a remote endpoint. This is only called if UNIFIED_PLAN
+     * semantics are specified. The transceiver will be disposed automatically.
+     */
+    @Override
+    public void onTrack(final RtpTransceiver transceiver, final MediaStream[] mediaStreams) {
     }
 
     /*
