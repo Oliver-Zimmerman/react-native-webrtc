@@ -639,21 +639,6 @@ RCT_EXPORT_METHOD(peerConnectionRemoveTrack:(nonnull NSNumber *)objectID
   return nil;
 }
 
-- (void)sendErrorWithEventName: (NSString *) eventName
-                      funcName: (NSString *) funcName
-                       message: (NSString *) message
-                          info: (NSDictionary *) info {
-    NSMutableDictionary *errorInfo = [NSMutableDictionary new];
-    
-    errorInfo[@"func"] = funcName;
-    if (info)
-        errorInfo[@"info"] = info;
-    if (message)
-        errorInfo[@"message"] = message;
-
-    [self sendEventWithName: kEventPeerConnectionOnError
-                       body: errorInfo];
-}
 #pragma mark - RTCPeerConnectionDelegate methods
 
 - (void)peerConnection:(RTCPeerConnection *)peerConnection didChangeSignalingState:(RTCSignalingState)newState {
@@ -740,10 +725,23 @@ RCT_EXPORT_METHOD(peerConnectionRemoveTrack:(nonnull NSNumber *)objectID
     [self sendEventWithName:kEventPeerConnectionDidOpenDataChannel body:body];
 }
 
-- (void)peerConnection:(RTCPeerConnection *)peerConnection didStartReceivingOnTransceiver:(RTCRtpTransceiver *)transceiver                                                                                                    streams:(NSArray<RTCMediaStream *> *)mediaStreams {
+- (void)peerConnection:(RTC_OBJC_TYPE(RTCPeerConnection) *)peerConnection didAddReceiver:(RTC_OBJC_TYPE(RTCRtpReceiver) *)rtpReceiver
+               streams:(NSArray<RTC_OBJC_TYPE(RTCMediaStream) *> *)mediaStreams {
     dispatch_async(self.workerQueue, ^{
-        RTCRtpReceiver *receiver = transceiver.receiver;
-        RTCMediaStreamTrack *track = receiver.track;
+        RTCRtpTransceiver *transceiver = nil;
+        for (RTCRtpTransceiver *t in peerConnection.transceivers) {
+            if ([rtpReceiver.receiverId isEqual: t.receiver.receiverId]) {
+                transceiver = t;
+                break;
+            }
+        }
+        
+        if (!transceiver) {
+            RCTLogWarn(@"Transceiver not found in didAddReceiver()");
+            return;
+        }
+        
+        RTCMediaStreamTrack *track = rtpReceiver.track;
         
         if (peerConnection.remoteTracks[track.trackId]) {
             return;
@@ -783,7 +781,7 @@ RCT_EXPORT_METHOD(peerConnectionRemoveTrack:(nonnull NSNumber *)objectID
         }
         
         params[@"streams"] = streams;
-        params[@"receiver"] = [SerializeUtils receiverToJSONWithPeerConnectionId: peerConnection.reactTag receiver: receiver];
+        params[@"receiver"] = [SerializeUtils receiverToJSONWithPeerConnectionId: peerConnection.reactTag receiver: rtpReceiver];
         params[@"transceiverOrder"] = [NSNumber numberWithInt:_transceiverNextId++];
         params[@"transceiver"] = [SerializeUtils transceiverToJSONWithPeerConnectionId: peerConnection.reactTag transceiver: transceiver];
         params[@"id"] = peerConnection.reactTag;

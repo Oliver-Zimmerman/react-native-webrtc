@@ -145,9 +145,15 @@ RCT_EXPORT_METHOD(transceiverSetDirection:(nonnull NSNumber *) objectID
         NSMutableDictionary *params = [NSMutableDictionary new];
         RTCRtpTransceiverDirection oldDirrection = transceiver.direction;
         params[@"oldDirection"] = [SerializeUtils serializeDirection: oldDirrection];
-        [transceiver setDirection:[SerializeUtils parseDirection:direction] error: nil];
+        NSError *error;
+        [transceiver setDirection:[SerializeUtils parseDirection:direction] error: &error];
         
-        // TODO add error handling
+        if (error) {
+            [self sendErrorWithEventName: kEventTransceiverOnError
+                                funcName: @"transceiverSetDirection"
+                                 message: [error localizedDescription]
+                                    info: nil];
+        }
 }
 
 RCT_EXPORT_METHOD(transceiverStop:(nonnull NSNumber *) objectID
