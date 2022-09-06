@@ -38,8 +38,6 @@ class MediaStreamTrack extends defineCustomEventTarget(...MEDIA_STREAM_TRACK_EVE
 
         const _readyState = info.readyState.toLowerCase();
         this.readyState = _readyState === 'initializing' || _readyState === 'live' ? 'live' : 'ended';
-
-        this._registerEvents();
     }
 
     get enabled(): boolean {
