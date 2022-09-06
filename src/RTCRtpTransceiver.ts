@@ -19,7 +19,7 @@ export default class RTCRtpTransceiver extends defineCustomEventTarget(...TRANSC
     _id: string;
     _mid: string | null = null;
     _direction: string;
-    _currentDirection: string | null = null;
+    _currentDirection: string;
     _stopped: boolean;
 
     constructor(args: {
@@ -52,7 +52,7 @@ export default class RTCRtpTransceiver extends defineCustomEventTarget(...TRANSC
         return this._mid;
     }
 
-    get isStopped() {
+    get stopped() {
         return this._stopped;
     }
 
@@ -101,7 +101,9 @@ export default class RTCRtpTransceiver extends defineCustomEventTarget(...TRANSC
                 return;
             }
             this._stopped = true;
-            this._currentDirection = null;
+            this._direction = 'stopped'
+            this._currentDirection = 'stopped';
+            this._mid = null;
             removeListener(this);
         });
 
