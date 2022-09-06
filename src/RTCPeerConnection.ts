@@ -459,15 +459,16 @@ export default class RTCPeerConnection extends defineCustomEventTarget(...PEER_C
                 .getSenders()
                 .filter((s) => s.id === ev.senderId);
 
+            const oldTrack = existingSender._track;
+
+            oldTrack?._muted = true;
+
             existingSender._track = null;
 
             const [existingTransceiver] = this
                 .getTransceivers()
                 .filter((t) => t.sender.id === existingSender.id);
             existingTransceiver._direction = existingTransceiver.direction === 'sendrecv' ? 'recvonly' : 'inactive';
-
-            ev.mute = true;
-            EventEmitter.emit('mediaStreamTrackOnMuteChanged', ev);
         });
 
         addListener(this, 'peerConnectionGotICECandidate', ev => {

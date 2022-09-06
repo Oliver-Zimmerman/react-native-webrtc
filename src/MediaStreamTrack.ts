@@ -3,7 +3,6 @@ import { NativeModules } from 'react-native';
 import { defineCustomEventTarget } from 'event-target-shim';
 
 import { deepClone } from './RTCUtil';
-import { addListener } from './EventEmitter';
 
 const { WebRTCModule } = NativeModules;
 
@@ -104,15 +103,6 @@ class MediaStreamTrack extends defineCustomEventTarget(...MEDIA_STREAM_TRACK_EVE
     
     release(): void {
         WebRTCModule.mediaStreamTrackRelease(this.id);
-    }
-
-    _registerEvents(): void {
-        addListener(this, 'mediaStreamTrackOnMuteChanged', ev => {
-            if (ev.peerConnectionId !== this._peerConnectionId || ev.trackId != this.id) {
-                return;
-            }
-            this._muted = ev.mute;
-        });
     }
 }
 
