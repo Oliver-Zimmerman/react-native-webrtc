@@ -206,8 +206,7 @@ export default class RTCPeerConnection extends defineCustomEventTarget(...PEER_C
             receiver: new RTCRtpReceiver(transceiver.receiver),
         });
 
-        this._transceivers.push({ order: transceiverOrder, transceiver: newTransceiver });
-        this._transceivers.sort((a, b) => a.order - b.order);
+        this._insertTransceiverSorted(transceiverOrder, newTransceiver);
 
         return newSender;
     }
