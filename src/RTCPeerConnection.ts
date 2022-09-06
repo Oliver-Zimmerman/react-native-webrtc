@@ -377,54 +377,77 @@ export default class RTCPeerConnection extends defineCustomEventTarget(...PEER_C
             if (ev.id !== this._peerConnectionId) {
                 return;
             }
-            const transceiver = (() => {
-                // Creating a track and receiver objects
-                const track = new MediaStreamTrack(ev.receiver.track);
-                const receiver = new RTCRtpReceiver({ ...ev.receiver, track });
-                // Make sure transceivers are stored in timestamp order. Also, we have to make
-                // sure we do not add a transceiver if it exists. 
-                let [{ transceiver } = { transceiver: null }] = this._transceivers.filter(({ transceiver }) => {
-                    return transceiver.id === ev.transceiver.id;
-                });
-                if (!transceiver) {
-                    // Creating objects out of the event data
-                    const newTransceiver = new RTCRtpTransceiver({ ...ev.transceiver, receiver: receiver });
-                    this._insertTransceiverSorted(ev.transceiverOrder, newTransceiver);
-                    return newTransceiver;
-                } else {
-                    transceiver._receiver._track = track;
-                    transceiver._mid = ev.transceiver.mid;
-                    transceiver._currentDirection = ev.transceiver.currentDirection;
-                    transceiver._direction = ev.transceiver.direction;
-                    return transceiver;
-                }
-            })();
 
-            // Get the stream object from the event. Create if necessary.
-            const streams = ev.streams.map(stream => {
-                // Here we are making sure that we don't create stream objects that already exist
-                // So that event listeners do get the same object if it has been created before.
-                if (!this._remoteStreams.has(stream.streamId)) {
-                    this._remoteStreams.set(stream.streamId, new MediaStream(stream));
-                }
-                return this._remoteStreams.get(stream.streamId);
+            log.debug(`${this._peerConnectionId} ontrack`);
+
+            const track = new MediaStreamTrack(ev.receiver.track);
+            let transceiver;
+
+            // Make sure transceivers are stored in timestamp order. Also, we have to make
+            // sure we do not add a transceiver if it exists. 
+                // sure we do not add a transceiver if it exists. 
+            // sure we do not add a transceiver if it exists. 
+            let [{ transceiver: oldTransceiver } = { transceiver: null }] = this._transceivers.filter(({ transceiver }) => {
+                return transceiver.id === ev.transceiver.id;
             });
 
+            if (!oldTransceiver) {
+                // Creating objects out of the event data.
+                const receiver = new RTCRtpReceiver({ ...ev.receiver, track });
+
+                transceiver = new RTCRtpTransceiver({ ...ev.transceiver, receiver });
+                this._insertTransceiverSorted(ev.transceiverOrder, transceiver);
+            } else {
+                transceiver = oldTransceiver;
+                transceiver._receiver._track = track;
+                transceiver._mid = ev.transceiver.mid;
+                transceiver._currentDirection = ev.transceiver.currentDirection;
+                transceiver._direction = ev.transceiver.direction;
+            }
+
+            // Get the stream object from the event. Create if necessary.
+            const streams = ev.streams.map(streamInfo => {
+                // Here we are making sure that we don't create stream objects that already exist
+                // So that event listeners do get the same object if it has been created before.
+                if (!this._remoteStreams.has(streamInfo.streamId)) {
+                    const stream = new MediaStream({
+                        streamId: streamInfo.streamId,
+                        streamReactTag: streamInfo.streamReactTag,
+                        tracks: []
+                    });
+                    this._remoteStreams.set(streamInfo.streamId, stream);
+                }
+                const stream = this._remoteStreams.get(streamInfo.streamId);
+                stream?._tracks.push(track);
+                return stream;
+            });
+
+            const eventData = {
+                streams,
+                transceiver,
+                track,
+                receiver: transceiver.receiver
+            };
+
             // @ts-ignore
-            this.dispatchEvent(new RTCTrackEvent('track', { streams, transceiver }));
+            this.dispatchEvent(new RTCTrackEvent('track', eventData));
         });
 
         addListener(this, 'peerConnectionOnRemoveTrack', ev => {
             if (ev.peerConnectionId !== this._peerConnectionId) {
                 return;
             }
+
+            log.debug(`${this._peerConnectionId} onremovetrack`);
+
             // Based on the W3C specs https://w3c.github.io/webrtc-pc/#dom-rtcpeerconnection-removetrack,
             // we need to remove the track from any media streams
             // that were previously passed to the `track` event. 
-            for (let stream of this._remoteStreams.values()) {
-                const trackIdx = stream.getTracks().findIndex((t) => t.id === ev.trackId);
-                if (trackIdx !== -1)
-                    stream.getTracks().splice(trackIdx, 1);
+            for (const stream of this._remoteStreams.values()) {
+                const trackIdx = stream._tracks.findIndex(t => t.id === ev.trackId);
+                if (trackIdx !== -1) {
+                    stream._tracks.splice(trackIdx, 1);
+                }
             }
         });
 
