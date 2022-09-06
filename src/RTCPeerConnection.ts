@@ -273,25 +273,21 @@ export default class RTCPeerConnection extends defineCustomEventTarget(...PEER_C
     }
 
     getTransceivers(): RTCRtpTransceiver[] {
-        // Return a cached version of transceivers
-        if (this._transceivers == null || this._transceivers.length === 0) {
-            return [];
-        } 
-        return this._transceivers.map((element) => element.transceiver);
+        return this._transceivers.map(e => e.transceiver);
     }
 
     getSenders(): RTCRtpSender[] {
-        return this.getTransceivers().map((t) => t.sender);
+        return this._transceivers.map(e => e.transceiver.sender);
     }
 
     getReceivers(): RTCRtpReceiver[] {
-        return this.getTransceivers().map((t) => t.receiver);
+        return this._transceivers.map(e => e.transceiver.receiver);
     }
 
     close(): void {
         // According to the W3C spec: https://w3c.github.io/webrtc-pc/#rtcpeerconnection-interface
         // transceivers have to be stopped
-        this._transceivers.forEach(({ order, transceiver })=> {
+        this._transceivers.forEach(({ transceiver })=> {
             transceiver.stop();
         })
         WebRTCModule.peerConnectionClose(this._peerConnectionId);
