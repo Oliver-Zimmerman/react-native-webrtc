@@ -294,10 +294,11 @@ RCT_EXPORT_METHOD(peerConnectionClose:(nonnull NSNumber *)objectID)
   }
 
   // Remove video track adapters
-  for(RTCMediaStream *stream in [peerConnection.remoteStreams allValues]) {
-    for (RTCVideoTrack *track in stream.videoTracks) {
-      [peerConnection removeVideoTrackAdapter:track];
-    }
+  for (NSString *key in peerConnection.remoteTracks.allKeys) {
+      RTCMediaStreamTrack *track = peerConnection.remoteTracks[key];
+      if (track.kind == kRTCMediaStreamTrackKindVideo) {
+        [peerConnection removeVideoTrackAdapter: (RTCVideoTrack*) track];
+      }
   }
 
   [peerConnection close];
