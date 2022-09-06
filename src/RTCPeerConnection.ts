@@ -461,7 +461,9 @@ export default class RTCPeerConnection extends defineCustomEventTarget(...PEER_C
 
             const oldTrack = existingSender._track;
 
-            oldTrack?._muted = true;
+            if (oldTrack) {
+                oldTrack._muted = true;
+            }
 
             existingSender._track = null;
 
