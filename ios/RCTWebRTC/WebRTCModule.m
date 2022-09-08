@@ -134,8 +134,7 @@ RCT_EXPORT_MODULE();
     kEventPeerConnectionOnRemoveTrack,
     kEventPeerConnectionOnRemoveTrackSuccessful,
     kEventPeerConnectionOnTrack,
-    kEventPeerConnectionOnError,
-    kEventMediaStreamTrackOnMuteChanged
+    kEventPeerConnectionOnError
   ];
 }
 

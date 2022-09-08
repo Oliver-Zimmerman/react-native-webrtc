@@ -73,9 +73,9 @@ class PeerConnectionObserver implements PeerConnection.Observer {
         peerConnection.close();
 
         // Remove video track adapters
-        for (MediaStream stream : remoteStreams.values()) {
-            for (VideoTrack videoTrack : stream.videoTracks) {
-                videoTrackAdapters.removeAdapter(videoTrack);
+        for (MediaStreamTrack track : this.remoteTracks.values()) {
+            if (track instanceof VideoTrack) {
+                videoTrackAdapters.removeAdapter((VideoTrack) track);
             }
         }
 

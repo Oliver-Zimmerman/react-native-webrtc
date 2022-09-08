@@ -20,6 +20,10 @@ import MediaStream from './MediaStream';
 import MediaStreamTrack from './MediaStreamTrack';
 import mediaDevices from './MediaDevices';
 import permissions from './Permissions';
+import Logger from './Logger';
+
+Logger.enable('*');
+//Logger.enable(`*,-${Logger.ROOT_PREFIX}:*:DEBUG`);
 
 export {
     RTCIceCandidate,

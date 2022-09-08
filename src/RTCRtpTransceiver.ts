@@ -1,6 +1,6 @@
 import { defineCustomEventTarget } from 'event-target-shim';
 import { NativeModules } from 'react-native';
-import { addListener } from './EventEmitter';
+import { addListener, removeListener } from './EventEmitter';
 import RTCRtpSender from './RTCRtpSender';
 import RTCErrorEvent from './RTCErrorEvent';
 import RTCRtpReceiver from './RTCRtpReceiver';
@@ -19,7 +19,7 @@ export default class RTCRtpTransceiver extends defineCustomEventTarget(...TRANSC
     _id: string;
     _mid: string | null = null;
     _direction: string;
-    _currentDirection: string | null = null;
+    _currentDirection: string;
     _stopped: boolean;
 
     constructor(args: {
@@ -52,7 +52,7 @@ export default class RTCRtpTransceiver extends defineCustomEventTarget(...TRANSC
         return this._mid;
     }
 
-    get isStopped() {
+    get stopped() {
         return this._stopped;
     }
 
@@ -95,15 +95,19 @@ export default class RTCRtpTransceiver extends defineCustomEventTarget(...TRANSC
         }
         WebRTCModule.transceiverStop(this._peerConnectionId, this.id);
     }
+
     _registerEvents(): void {
-      
         addListener(this, 'transceiverStopSuccessful', ev => {
             if (ev.peerConnectionId !== this._peerConnectionId || ev.transceiverId !== this._id) {
                 return;
             }
             this._stopped = true;
-            this._currentDirection = null;
+            this._direction = 'stopped'
+            this._currentDirection = 'stopped';
+            this._mid = null;
+            removeListener(this);
         });
+
         addListener(this, 'transceiverOnError', ev => {
             if (ev.info.peerConnectionId !== this._peerConnectionId || ev.info.transceiverId !== this._id) {
                 return;

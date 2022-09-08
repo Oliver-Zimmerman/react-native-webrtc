@@ -36,7 +36,6 @@ static NSString *const kEventPeerConnectionOnRemoveTrack = @"peerConnectionOnRem
 static NSString *const kEventPeerConnectionOnRemoveTrackSuccessful = @"peerConnectionOnRemoveTrackSuccessful";
 static NSString *const kEventPeerConnectionOnTrack = @"peerConnectionOnTrack";
 static NSString *const kEventPeerConnectionOnError = @"peerConnectionOnError";
-static NSString *const kEventMediaStreamTrackOnMuteChanged = @"mediaStreamTrackOnMuteChanged";
 
 @interface WebRTCModule : RCTEventEmitter <RCTBridgeModule>
 

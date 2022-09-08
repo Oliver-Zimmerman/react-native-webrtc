@@ -187,6 +187,10 @@ public class WebRTCView extends ViewGroup {
                     videoTrack = videoTracks.get(0);
                 }
             }
+
+            if (videoTrack == null) {
+                Log.w(TAG, "No video stream for react tag: " + streamURL);
+            }
         }
         
         return videoTrack;
