@@ -27,11 +27,16 @@ export default class RTCRtpSender {
         }
     }
 
-    replaceTrack(track: MediaStreamTrack | null): Promise<void> {
-        return WebRTCModule.senderReplaceTrack(this._peerConnectionId, this._id, track ? track.id : null)
-            .then(() => this._track = track);
+    async replaceTrack(track: MediaStreamTrack | null): Promise<void> {
+        try {
+            await WebRTCModule.senderReplaceTrack(this._peerConnectionId, this._id, track ? track.id : null);
+        } catch(e) {
+            return;
+        }
+
+        this._track = track;
     }
-    
+
     static getCapabilities(kind: "audio" | "video"): RTCRtpCapabilities {
         if (kind === "audio") {
             return DEFAULT_AUDIO_CAPABILITIES;

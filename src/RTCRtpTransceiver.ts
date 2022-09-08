@@ -95,6 +95,7 @@ export default class RTCRtpTransceiver extends defineCustomEventTarget(...TRANSC
         }
         WebRTCModule.transceiverStop(this._peerConnectionId, this.id);
     }
+
     _registerEvents(): void {
         addListener(this, 'transceiverStopSuccessful', ev => {
             if (ev.peerConnectionId !== this._peerConnectionId || ev.transceiverId !== this._id) {
