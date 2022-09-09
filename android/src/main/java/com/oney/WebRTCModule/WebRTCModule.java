@@ -406,7 +406,7 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
             final boolean v = map.getBoolean("presumeWritableWhenFullyRelayed");
             conf.presumeWritableWhenFullyRelayed = v;
         }
-        
+
         return conf;
     }
 
@@ -512,12 +512,12 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
                 RtpTransceiver transceiver = null;
                 if (options.hasKey("type")) {
                     String kind = options.getString("type");
-                    transceiver = pco.addTransceiver(SerializeUtils.parseMediaType(kind), 
+                    transceiver = pco.addTransceiver(SerializeUtils.parseMediaType(kind),
                         SerializeUtils.parseTransceiverOptions(options.getMap("init")));
                 } else if (options.hasKey("trackId")) {
                     String trackId = options.getString("trackId");
                     MediaStreamTrack track = getTrack(trackId);
-                    transceiver = pco.addTransceiver(track, 
+                    transceiver = pco.addTransceiver(track,
                         SerializeUtils.parseTransceiverOptions(options.getMap("init")));
 
                 } else {
@@ -556,6 +556,11 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
                 }
 
                 MediaStreamTrack track = getLocalTrack(trackId);
+                if (track == null) {
+                    Log.w(TAG, "peerConnectionAddTrack() couldn't find track " + trackId);
+                    return null;
+                }
+
                 List<String> streamIds = new ArrayList<>();
                 if (options.hasKey("streamIds")) {
                     ReadableArray rawStreamIds = options.getArray("streamIds");
@@ -570,7 +575,7 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
                 // Need to get the corresponding transceiver as well
                 RtpTransceiver transceiver = pco.getTransceiver(sender.id());
 
-                // We need the tranceiver creation order to reorder the transceivers array 
+                // We need the transceiver creation order to reorder the transceivers array
                 // in the JS layer.
                 WritableMap params = Arguments.createMap();
                 params.putInt("transceiverOrder", pco.getNextTransceiverId());
@@ -594,27 +599,25 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
                     promise.reject(new Exception("Peer Connection is not initialized"));
                     return;
                 }
-                RtpTransceiver transceiver = pco.getTransceiver(senderId); // transceiver Id is not a thing, we identify them by sender Ids
 
-                if (transceiver == null) {
-                    Log.d(TAG, "senderSetParameters() transceiver is null");
-                    promise.reject(new Exception("Could not get transceiver"));
+                RtpSender sender = pco.getSender(senderId);
+                if (sender == null) {
+                    Log.w(TAG, "senderSetParameters() sender is null");
+                    promise.reject(new Exception("Could not get sender"));
                     return;
                 }
 
-                RtpSender sender = transceiver.getSender();
                 RtpParameters params = sender.getParameters();
                 params = SerializeUtils.updateRtpParameters(options, params);
                 sender.setParameters(params);
-                promise.resolve(
-                    SerializeUtils.serializeRtpParameters(
-                        sender.getParameters()));
+                promise.resolve(SerializeUtils.serializeRtpParameters(sender.getParameters()));
             } catch (Exception e) {
                 Log.d(TAG, "senderSetParameters: " + e.getMessage());
                 promise.reject(e);
             }
         });
-    } 
+    }
+
     @ReactMethod
     public void peerConnectionRemoveTrack(int id, String senderId) {
             ThreadUtils.runOnExecutor(() -> {
@@ -628,8 +631,14 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
                         sendError("peerConnectionOnError", "removeTrack", "Peer Connection is not initialized", null);
                         return;
                     }
-                    RtpTransceiver transceiver = pco.getTransceiver(senderId);
-                    boolean successful = pco.getPeerConnection().removeTrack(transceiver.getSender());
+                    RtpSender sender = pco.getSender(senderId);
+                    if (sender == null) {
+                        Log.w(TAG, "peerConnectionRemoveTrack() sender is null");
+                        sendError("peerConnectionOnError", "removeTrack", "Sender is null", null);
+                        return;
+                    }
+
+                    boolean successful = pco.getPeerConnection().removeTrack(sender);
                     if (successful) {
                         sendEvent("peerConnectionOnRemoveTrackSuccessful", identifier);
                         return;
@@ -683,17 +692,15 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
                     promise.reject(new Exception("Peer Connection is not initialized"));
                     return;
                 }
-                RtpTransceiver transceiver = pco.getTransceiver(senderId); // transceiver Id is not a thing, we identify them by sender Ids
 
-                if (transceiver == null) {
-                    Log.d(TAG, "senderReplaceTrack() transceiver is null");
-                    promise.reject(new Exception("Could not get transceiver"));
+                RtpSender sender = pco.getSender(senderId);
+                if (sender == null) {
+                    Log.w(TAG, "senderReplaceTrack() sender is null");
+                    promise.reject(new Exception("Could not get sender"));
                     return;
                 }
 
-                RtpSender sender = transceiver.getSender();
                 MediaStreamTrack track = getLocalTrack(trackId);
-                //TODO: Discuss local track ownership.
                 sender.setTrack(track, false);
                 promise.resolve(true);
             } catch (Exception e) {
@@ -728,7 +735,7 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
                     return;
                 }
 
-                RtpTransceiver.RtpTransceiverDirection oldDirection = transceiver.getDirection(); 
+                RtpTransceiver.RtpTransceiverDirection oldDirection = transceiver.getDirection();
                 params.putString("oldDirection", SerializeUtils.serializeDirection(oldDirection));
                 transceiver.setDirection(SerializeUtils.parseDirection(direction));
             } catch (Exception e) {
@@ -859,7 +866,7 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
 
     /**
      * This serializes the transceivers current direction and mid and returns them
-     * for update when an sdp negotiation/renegotiation happens 
+     * for update when an sdp negotiation/renegotiation happens
      */
     private ReadableArray getTransceiversInfo(int id) {
         PeerConnectionObserver pco = mPeerConnectionObservers.get(id);
@@ -877,7 +884,7 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
             transceiverUpdate.putInt("peerConnectionId", id);
             transceiverUpdate.putString("mid", transceiver.getMid());
             transceiverUpdate.putString("currentDirection", directionSerialized);
-            transceiverUpdate.putMap("senderRtpParameters", 
+            transceiverUpdate.putMap("senderRtpParameters",
                 SerializeUtils.serializeRtpParameters(
                     transceiver.getSender().getParameters()));
             transceiverUpdates.pushMap(transceiverUpdate);
@@ -1074,7 +1081,7 @@ public class WebRTCModule extends ReactContextBaseJavaModule {
         });
     }
 
-    
+
     @ReactMethod(isBlockingSynchronousMethod = true)
     public WritableMap receiverGetCapabilities() {
         try {
