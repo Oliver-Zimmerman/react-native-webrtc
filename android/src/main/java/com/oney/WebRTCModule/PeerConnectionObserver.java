@@ -117,12 +117,26 @@ class PeerConnectionObserver implements PeerConnection.Observer {
         return peerConnection.addTransceiver(track, init);
     }
 
+    RtpSender getSender(String id) {
+        if (this.peerConnection == null) {
+            return null;
+        }
+
+        for (RtpSender sender: this.peerConnection.getSenders()) {
+            if (sender.id().equals(id)) {
+                return sender;
+            }
+        }
+
+        return null;
+    }
+
     RtpTransceiver getTransceiver(String id) {
         if (this.peerConnection == null) {
             return null;
         }
 
-        for(RtpTransceiver transceiver: this.peerConnection.getTransceivers()) {
+        for (RtpTransceiver transceiver: this.peerConnection.getTransceivers()) {
             if (transceiver.getSender().id().equals(id)) {
                 return transceiver;
             }
